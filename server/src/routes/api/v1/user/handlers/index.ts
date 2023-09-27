@@ -8,10 +8,10 @@ import * as bcrypt from "bcryptjs";
 
 export const userLoginHandler = async (
   request: FastifyRequest<ChatRequestBody>,
-  reply: FastifyReply,
+  reply: FastifyReply
 ) => {
   const { username, password } = request.body;
-
+  console.log(username, password);
   const user = await request.server.prisma.user.findFirst({
     where: {
       username: username,
@@ -65,7 +65,7 @@ export const userLoginHandler = async (
 
 export const updateUsernameHandler = async (
   request: FastifyRequest<UpdateUsernameRequestBody>,
-  reply: FastifyReply,
+  reply: FastifyReply
 ) => {
   const user = request.user;
 
@@ -85,7 +85,7 @@ export const updateUsernameHandler = async (
 
 export const updatePasswordHandler = async (
   request: FastifyRequest<UpdatePasswordRequestBody>,
-  reply: FastifyReply,
+  reply: FastifyReply
 ) => {
   const user = request.user;
 
@@ -103,7 +103,7 @@ export const updatePasswordHandler = async (
 
   const isPasswordValid = await bcrypt.compare(
     request.body.oldPassword,
-    userDetails.password,
+    userDetails.password
   );
 
   if (!isPasswordValid) {

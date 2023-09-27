@@ -1,5 +1,5 @@
 -- Enable pg_vector
-create extension if not exists vector;
+-- create extension if not exists vector;
 -- Tables
 CREATE TABLE "public"."Bot" (
     "id" text NOT NULL,
@@ -10,7 +10,7 @@ CREATE TABLE "public"."Bot" (
     "temperature" double precision DEFAULT '0.7' NOT NULL,
     "model" text DEFAULT 'gpt-3.5-turbo' NOT NULL,
     "provider" text DEFAULT 'openai' NOT NULL,
-    "embedding" text DEFAULT 'openai' NOT NULL,
+    "embedding" bytea NOT NULL, -- Use bytea for binary data
     CONSTRAINT "Bot_pkey" PRIMARY KEY ("id"),
     CONSTRAINT "Bot_publicId_key" UNIQUE ("publicId")
 ) WITH (oids = false);
@@ -22,7 +22,7 @@ CREATE TABLE "public"."BotDocument" (
     "sourceId" text NOT NULL,
     "botId" text NOT NULL,
     "content" text NOT NULL,
-    "embedding" vector NOT NULL,
+    "embedding" bytea NOT NULL, -- Use bytea for binary data
     "metadata" jsonb NOT NULL,
     CONSTRAINT "BotDocument_pkey" PRIMARY KEY ("id")
 ) WITH (oids = false);
@@ -59,7 +59,7 @@ ALTER TABLE ONLY "public"."BotDocument" ADD CONSTRAINT "BotDocument_sourceId_fke
 ALTER TABLE ONLY "public"."BotSource" ADD CONSTRAINT "BotSource_botId_fkey" FOREIGN KEY ("botId") REFERENCES "Bot"(id) ON UPDATE CASCADE ON DELETE RESTRICT NOT DEFERRABLE;
 -- Functions
 CREATE OR REPLACE FUNCTION similarity_search (
-  query_embedding vector,
+  query_embedding bytea, -- Use bytea for binary data
   botId text,
   match_count int DEFAULT null
 ) RETURNS TABLE (
