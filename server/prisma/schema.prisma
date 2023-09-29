@@ -6,7 +6,7 @@ generator client {
 datasource db {
   provider   = "postgresql"
   url        = env("DATABASE_URL")
-  extensions = [uuid_ossp(map: "uuid-ossp")]
+  extensions = [vector(schema: "public")]
 }
 
 model Bot {
@@ -18,7 +18,7 @@ model Bot {
   temperature                 Float            @default(0.7)
   model                       String           @default("gpt-3.5-turbo")
   provider                    String           @default("openai")
-  embedding                   Bytes            // Use the Bytes type for binary data
+  embedding                   String           @default("openai")
   streaming                   Boolean          @default(false)
   showRef                     Boolean          @default(false)
   questionGeneratorPrompt     String           @default("Given the following conversation and a follow up question, rephrase the follow up question to be a standalone question.   Chat History: {chat_history} Follow Up Input: {question} Standalone question:")
@@ -54,7 +54,7 @@ model BotDocument {
   sourceId  String
   botId     String
   content   String
-  embedding Bytes                // Use the Bytes type for binary data
+  embedding Unsupported("vector")
   metadata  Json
   bot       Bot                   @relation(fields: [botId], references: [id])
   source    BotSource             @relation(fields: [sourceId], references: [id])
@@ -141,4 +141,15 @@ model BotWhatsappHistory {
   identifier String?
   human      String?
   bot        String?
+}
+
+model botWebHistory {
+  id        String   @id @default(uuid())
+  bot_id    String
+  chat_id   String
+  metadata  Json?
+  sources   Json?
+  human     String?
+  bot       String?
+  createdAt DateTime @default(now())
 }

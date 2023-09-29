@@ -16,7 +16,7 @@ import { isStreamingSupported } from "../../../../../utils/models";
 
 export const createBotHandler = async (
   request: FastifyRequest<CreateBotRequest>,
-  reply: FastifyReply,
+  reply: FastifyReply
 ) => {
   const {
     content,
@@ -27,7 +27,7 @@ export const createBotHandler = async (
   } = request.body;
 
   const prisma = request.server.prisma;
-
+  console.log(request.body);
   const isEmbeddingsValid = apiKeyValidaton(embedding);
 
   if (!isEmbeddingsValid) {
@@ -47,7 +47,7 @@ export const createBotHandler = async (
   }
 
   const isAPIKeyAddedForProvider = apiKeyValidaton(providerName);
-
+  console.log(isAPIKeyAddedForProvider, "api key reached");
   if (!isAPIKeyAddedForProvider) {
     return reply.status(400).send({
       message: apiKeyValidatonMessage(providerName),
@@ -81,14 +81,21 @@ export const createBotHandler = async (
       options: request.body.options,
     },
   });
-
-  await request.server.queue.add([{
-    ...botSource,
-    embedding,
-    maxDepth: request.body.maxDepth,
-    maxLinks: request.body.maxLinks,
-    options: request.body.options,
-  }]);
+  console.log(botSource, "this bot source");
+  try {
+    await request.server.queue.add([
+      {
+        ...botSource,
+        embedding,
+        maxDepth: request.body.maxDepth,
+        maxLinks: request.body.maxLinks,
+        options: request.body.options,
+      },
+    ]);
+  } catch (error) {
+    console.log(error);
+  }
+  console.log("end of the request ");
   return {
     id: bot.id,
   };
@@ -96,7 +103,7 @@ export const createBotHandler = async (
 
 export const addNewSourceByIdHandler = async (
   request: FastifyRequest<AddNewSourceById>,
-  reply: FastifyReply,
+  reply: FastifyReply
 ) => {
   const prisma = request.server.prisma;
   const id = request.params.id;
@@ -113,10 +120,7 @@ export const addNewSourceByIdHandler = async (
     });
   }
 
-  const {
-    content,
-    type,
-  } = request.body;
+  const { content, type } = request.body;
 
   const botSource = await prisma.botSource.create({
     data: {
@@ -127,13 +131,15 @@ export const addNewSourceByIdHandler = async (
     },
   });
 
-  await request.server.queue.add([{
-    ...botSource,
-    embedding: bot.embedding,
-    maxDepth: request.body.maxDepth,
-    maxLinks: request.body.maxLinks,
-    options: request.body.options,
-  }]);
+  await request.server.queue.add([
+    {
+      ...botSource,
+      embedding: bot.embedding,
+      maxDepth: request.body.maxDepth,
+      maxLinks: request.body.maxLinks,
+      options: request.body.options,
+    },
+  ]);
   return {
     id: bot.id,
   };
@@ -141,7 +147,7 @@ export const addNewSourceByIdHandler = async (
 
 export const refreshSourceByIdHandler = async (
   request: FastifyRequest<GetSourceByIds>,
-  reply: FastifyReply,
+  reply: FastifyReply
 ) => {
   const prisma = request.server.prisma;
   const bot_id = request.params.id;
@@ -188,10 +194,12 @@ export const refreshSourceByIdHandler = async (
       sourceId: source_id,
     },
   });
-  await request.server.queue.add([{
-    ...botSource,
-    embedding: bot.embedding,
-  }]);
+  await request.server.queue.add([
+    {
+      ...botSource,
+      embedding: bot.embedding,
+    },
+  ]);
 
   return {
     id: bot.id,

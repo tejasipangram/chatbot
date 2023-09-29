@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useNavigate, useParams } from "react-router-dom";
+import { resolvePath, useNavigate, useParams } from "react-router-dom";
 import api from "../../services/api";
 import React from "react";
 import { SkeletonLoading } from "../../components/Common/SkeletonLoading";
@@ -13,6 +13,7 @@ export default function BotDSRoot() {
     ["getBotDS", param.id],
     async () => {
       const response = await api.get(`/bot/${param.id}/source`);
+      console.log(response, "this api is calling");
       return response.data as {
         data: {
           id: string;
@@ -35,7 +36,6 @@ export default function BotDSRoot() {
 
   return (
     <div className="mx-auto my-3 w-full max-w-7xl">
-
       {status === "loading" && <SkeletonLoading />}
       {status === "success" && <DsTable data={botData.data} />}
     </div>
